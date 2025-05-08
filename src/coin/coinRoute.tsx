@@ -4,11 +4,16 @@ import Coin from "./Coin";
 import Chart from "./Chart";
 import Price from "./Price";
 import CoinApp from "./CoinApp";
+import CoinProvider from "./CoinProvider";
 
 export const coinRoute: RouteObject[] = [
   {
     path: "/coin",
-    element: <CoinApp />,
+    element: (
+      <CoinProvider>
+        <CoinApp />
+      </CoinProvider>
+    ),
     children: [
       {
         path: "",

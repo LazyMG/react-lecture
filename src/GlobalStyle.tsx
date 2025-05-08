@@ -59,6 +59,10 @@ body{
   font-weight: 300;
   margin: 0;
   height: 100vh;
+
+  &::-webkit-scrollbar {
+  display: none; /* Chrome, Safari */
+}
 }
 a{
   text-decoration: none;

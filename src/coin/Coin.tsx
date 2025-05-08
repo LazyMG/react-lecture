@@ -9,12 +9,16 @@ import {
 import styled from "styled-components";
 import { fetchCoinInfo, fetchCoinTickers } from "./api";
 import { Helmet } from "react-helmet-async";
+import Spinner from "./Spinner";
+import FloatingButton from "./FloatingButton";
+import ThemeButton from "./ThemeButton";
 
 const Container = styled.div`
   padding: 0px 20px;
   max-width: 480px;
   margin: 0 auto;
   position: relative;
+  padding-bottom: 190px;
 `;
 
 const Header = styled.header`
@@ -25,18 +29,28 @@ const Header = styled.header`
 `;
 
 const Title = styled.h1`
-  font-size: 36px;
-  color: ${(props) => props.theme.accentColor};
+  font-size: 2rem;
+  color: ${(props) => props.theme.coin.accentColor};
 `;
 
 const Loader = styled.span`
-  text-align: center;
-  display: block;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: fixed;
+  padding: 0px 20px;
+  width: 100%;
+  max-width: 440px;
+  margin: 0 auto;
+  height: calc(100% - 20vh);
 `;
 
 const Overview = styled.div`
-  display: flex;
-  justify-content: space-between;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+  gap: 1rem;
+  justify-content: center;
+
   background-color: rgba(0, 0, 0, 0.5);
   padding: 10px 20px;
   border-radius: 10px;
@@ -46,6 +60,7 @@ const OverviewItem = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
+  color: ${(props) => props.theme.coin.overviewColor};
 
   span:first-child {
     font-size: 10px;
@@ -54,8 +69,10 @@ const OverviewItem = styled.div`
     margin-bottom: 5px;
   }
 `;
+
 const Description = styled.p`
   margin: 20px 0px;
+  color: ${(props) => props.theme.coin.descriptionColor};
 `;
 
 const Tabs = styled.div`
@@ -74,7 +91,9 @@ const Tab = styled.span<{ $isActive: boolean }>`
   padding: 7px 0px;
   border-radius: 10px;
   color: ${(props) =>
-    props.$isActive ? props.theme.accentColor : props.theme.textColor};
+    props.$isActive
+      ? props.theme.coin.accentColor
+      : props.theme.coin.overviewColor};
   a {
     display: block;
   }
@@ -84,27 +103,12 @@ const Overlay = styled.div`
   position: fixed;
   width: 100%;
   max-width: 480px;
-  height: 100px;
+  height: 150px;
   z-index: 100;
   left: 50%;
   transform: translateX(-50%);
   bottom: 10px;
   pointer-events: none;
-`;
-
-const FloatingButton = styled.div`
-  position: absolute;
-  width: 50px;
-  height: 50px;
-  right: 20px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-  cursor: pointer;
-  border-radius: 50%;
-  pointer-events: auto;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  background-color: rgba(0, 0, 0, 0.5);
 `;
 
 interface ILocationState {
@@ -179,6 +183,7 @@ const Coin = () => {
     queryKey: ["coinPrice", `${coinId || ""}`],
     queryFn: () => fetchCoinTickers(coinId || ""),
   });
+
   const chartMatch = useMatch("/coin/:coinId/chart");
   const priceMatch = useMatch("/coin/:coinId/price");
 
@@ -198,7 +203,9 @@ const Coin = () => {
           </Title>
         </Header>
         {loading ? (
-          <Loader>Loading...</Loader>
+          <Loader>
+            <Spinner />
+          </Loader>
         ) : (
           <>
             <Overview>
@@ -239,8 +246,20 @@ const Coin = () => {
         )}
       </Container>
       <Overlay>
-        <FloatingButton>
-          <Link to={"/coin"}>홈</Link>
+        <FloatingButton top={0}>
+          <ThemeButton />
+        </FloatingButton>
+        <FloatingButton top={55}>
+          <Link to={"/coin"}>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path d="m2.25 12 8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
+            </svg>
+          </Link>
         </FloatingButton>
       </Overlay>
     </>

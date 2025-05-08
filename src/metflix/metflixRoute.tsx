@@ -3,11 +3,16 @@ import MetflixApp from "./MetflixApp";
 import MetflixHome from "./pages/MetflixHome";
 import MetflixTv from "./pages/MetflixTv";
 import MetflixSearch from "./pages/MetflixSearch";
+import MetflixProvier from "./MetflixProvier";
 
 export const metflixRoute: RouteObject[] = [
   {
     path: "/metflix",
-    element: <MetflixApp />,
+    element: (
+      <MetflixProvier>
+        <MetflixApp />
+      </MetflixProvier>
+    ),
     children: [
       {
         path: "",

@@ -1,30 +1,23 @@
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import styled from "styled-components";
-import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
-import { HelmetProvider } from "react-helmet-async";
+import styled, { ThemeProvider } from "styled-components";
 import { Outlet } from "react-router-dom";
+import { darkTheme, theme } from "../theme";
+import { useTheme } from "./useTheme";
 
 const Wrapper = styled.div`
   width: 100%;
   min-height: 100vh;
-  background-color: ${(props) => props.theme.bgColor};
-  color: ${(props) => props.theme.textColor};
+  background-color: ${(props) => props.theme.coin.bgColor};
+  color: ${(props) => props.theme.coin.textColor};
 `;
 
-const coinQueryClient = new QueryClient();
-
 const CoinApp = () => {
+  const { isDark } = useTheme();
   return (
-    <>
-      <QueryClientProvider client={coinQueryClient}>
-        <HelmetProvider>
-          <Wrapper>
-            <Outlet />
-          </Wrapper>
-          <ReactQueryDevtools initialIsOpen={true} />
-        </HelmetProvider>
-      </QueryClientProvider>
-    </>
+    <ThemeProvider theme={isDark ? darkTheme : theme}>
+      <Wrapper>
+        <Outlet />
+      </Wrapper>
+    </ThemeProvider>
   );
 };
 

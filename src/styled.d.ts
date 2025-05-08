@@ -2,9 +2,6 @@ import "styled-components";
 
 declare module "styled-components" {
   export interface DefaultTheme {
-    textColor: string;
-    bgColor: string;
-    accentColor: string;
     metflix: {
       red: string;
       black: {
@@ -16,6 +13,14 @@ declare module "styled-components" {
         lighter: string;
         darker: string;
       };
+    };
+    coin: {
+      textColor: string;
+      bgColor: string;
+      accentColor: string;
+      overviewColor: string;
+      descriptionColor: string;
+      shadowColor: string;
     };
   }
 }
