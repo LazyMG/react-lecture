@@ -1,10 +1,8 @@
-import { useQuery } from "@tanstack/react-query";
 import { useOutletContext } from "react-router-dom";
-import { fetchCoinHistory } from "./api";
 import Spinner from "./Spinner";
 import styled from "styled-components";
-import { useMemo, useState } from "react";
-import { IChartData, IErrorData } from "./types";
+import { useState } from "react";
+import { useCoinPrice } from "./useCoinPrice";
 
 const Loader = styled.span`
   display: flex;
@@ -124,14 +122,18 @@ const getDateInfo = (dateInfo: Date) => {
     .padStart(2, "0")}. ${dateInfo.getDate().toString().padStart(2, "0")}`;
 };
 
+const getDifference = (to: string, from: string) =>
+  parseFloat(to) - parseFloat(from);
+
+const getPercentage = (to: string, from: string) =>
+  ((parseFloat(to) - parseFloat(from)) / parseFloat(from)) * 100;
+
 const Price = () => {
   const [range, setRange] = useState<number>(7);
 
   const { coinId } = useOutletContext<{ coinId: string }>();
-  const { isLoading, data } = useQuery<IChartData[] | IErrorData>({
-    queryKey: ["price", `${coinId}`],
-    queryFn: () => fetchCoinHistory(coinId),
-  });
+
+  const { isLoading, start, end, error } = useCoinPrice(coinId, range);
 
   const rangeChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const rangeValue = event.currentTarget.value;
@@ -142,58 +144,13 @@ const Price = () => {
     }
   };
 
-  const rangedDiff = useMemo(() => {
-    if (!data || "error" in data) return null;
-
-    const startClose = parseFloat(data[data.length - 2 - range].close ?? "0");
-    const endClose = parseFloat(data[data.length - 2].close ?? "0");
-
-    if (!startClose || !endClose) return null;
-
-    const closePercent = ((endClose - startClose) / startClose) * 100;
-
-    const startVolume = parseFloat(data[data.length - 2 - range].volume ?? "0");
-    const endVolume = parseFloat(data[data.length - 2].volume ?? "0");
-
-    if (!startVolume || !endVolume) return null;
-
-    const volumePercent = ((endVolume - startVolume) / startVolume) * 100;
-
-    const dateStart = getDateInfo(
-      new Date(data[data.length - 2 - range].time_close * 1000)
-    );
-
-    const dateEnd = getDateInfo(
-      new Date(data[data.length - 2].time_close * 1000)
-    );
-
-    return {
-      close: {
-        start: startClose,
-        end: endClose,
-        value: closePercent.toFixed(2),
-        isPositive: closePercent > 0,
-      },
-      volume: {
-        start: startVolume,
-        end: endVolume,
-        value: volumePercent.toFixed(2),
-        isPositive: volumePercent > 0,
-      },
-      date: {
-        start: dateStart,
-        end: dateEnd,
-      },
-    };
-  }, [data, range]);
-
   return (
     <div>
       {isLoading ? (
         <Loader>
           <Spinner />
         </Loader>
-      ) : !data || "error" in data ? (
+      ) : error || !start || !end ? (
         <Error>No Data</Error>
       ) : (
         <>
@@ -228,11 +185,11 @@ const Price = () => {
           <PriceTitle>Difference Between</PriceTitle>
           <Overview>
             <OverviewHeader $isDate={true}>
-              {rangedDiff?.date.start}
+              {getDateInfo(new Date(start.time_close * 1000))}
             </OverviewHeader>
             <OverviewHeader $isDate={false}>AND</OverviewHeader>
             <OverviewHeader $isDate={true}>
-              {rangedDiff?.date.end}
+              {getDateInfo(new Date(end.time_close * 1000))}
             </OverviewHeader>
           </Overview>
           <Tabs>
@@ -240,15 +197,18 @@ const Price = () => {
               <TabHeader>Close</TabHeader>
               <TabContent>
                 <TabRow>
-                  {rangedDiff?.date.start}: {rangedDiff?.close.start}
+                  {getDateInfo(new Date(start.time_close * 1000))}:{" "}
+                  {start.close}
                 </TabRow>
                 <TabRow>
-                  {rangedDiff?.date.end}: {rangedDiff?.close.end}
+                  {getDateInfo(new Date(end.time_close * 1000))}: {end.close}
                 </TabRow>
               </TabContent>
               <TabContent>
-                <TabResult $color={rangedDiff?.close.isPositive || false}>
-                  {rangedDiff?.close.value}%
+                <TabResult
+                  $color={getDifference(end.close, start.close) > 0 || false}
+                >
+                  {getPercentage(end.close, start.close).toFixed(2)}%
                 </TabResult>
               </TabContent>
             </Tab>
@@ -256,15 +216,18 @@ const Price = () => {
               <TabHeader>Volume</TabHeader>
               <TabContent>
                 <TabRow>
-                  {rangedDiff?.date.start}: {rangedDiff?.volume.start}
+                  {getDateInfo(new Date(start.time_close * 1000))}:{" "}
+                  {start.volume}
                 </TabRow>
                 <TabRow>
-                  {rangedDiff?.date.end}: {rangedDiff?.volume.end}
+                  {getDateInfo(new Date(end.time_close * 1000))}: {end.volume}
                 </TabRow>
               </TabContent>
               <TabContent>
-                <TabResult $color={rangedDiff?.volume.isPositive || false}>
-                  {rangedDiff?.volume.value}%
+                <TabResult
+                  $color={getDifference(end.volume, start.volume) > 0 || false}
+                >
+                  {getPercentage(end.volume, start.volume).toFixed(2)}%
                 </TabResult>
               </TabContent>
             </Tab>
