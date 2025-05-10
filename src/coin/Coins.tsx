@@ -6,16 +6,7 @@ import { Helmet } from "react-helmet-async";
 import Spinner from "./Spinner";
 import FloatingButton from "./FloatingButton";
 import ThemeButton from "./ThemeButton";
-
-interface ICoin {
-  id: string;
-  name: string;
-  symbol: string;
-  rank: number;
-  is_new: boolean;
-  is_active: boolean;
-  type: string;
-}
+import { ICoin } from "./types";
 
 const Container = styled.div`
   padding: 0px 20px;
@@ -98,8 +89,8 @@ const Coins = () => {
   const imgErrorHandler = (
     event: React.SyntheticEvent<HTMLImageElement, Event>
   ) => {
-    event.currentTarget.onerror = null; // 무한 루프 방지
-    event.currentTarget.src = "/coin.png"; // public 폴더
+    event.currentTarget.onerror = null;
+    event.currentTarget.src = "/coin.png";
   };
 
   return (

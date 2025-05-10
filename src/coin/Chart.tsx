@@ -4,21 +4,7 @@ import { fetchCoinHistory } from "./api";
 import ApexChart from "react-apexcharts";
 import styled from "styled-components";
 import Spinner from "./Spinner";
-
-interface IChartData {
-  close: string;
-  high: string;
-  low: string;
-  market_cap: number;
-  open: string;
-  time_close: number;
-  time_open: number;
-  volume: string;
-}
-
-interface IErrorData {
-  error: string;
-}
+import { IChartData, IErrorData } from "./types";
 
 const Loader = styled.span`
   display: flex;
@@ -29,6 +15,16 @@ const Loader = styled.span`
   max-width: 440px;
   margin: 0 auto;
   height: 200px;
+`;
+
+const Error = styled.div`
+  height: 200px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: red;
+  font-weight: 600;
+  font-size: 24px;
 `;
 
 const Chart = () => {
@@ -45,7 +41,7 @@ const Chart = () => {
           <Spinner />
         </Loader>
       ) : !data || "error" in data ? (
-        <div>No Data</div>
+        <Error>No Data</Error>
       ) : (
         <ApexChart
           type="line"
